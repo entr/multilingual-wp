@@ -1,18 +1,33 @@
 <?php
+/**
+ * Takes care of loading the framework files
+ * 
+ * This file is part of the {@link https://github.com/scribu/wp-scb-framework wp-scb-framework}. It has been modified
+ * in order to better fit the plugin and avoid collisions because of
+ * those changes.
+ *
+ * @package Multilingual WP
+ * @subpackage wp-scb-framework
+ * @author {@link https://github.com/scribu scribu[Cristi Burcă]}
+ * @author {@link https://github.com/Rarst Rarst}
+ * @author Nikola Nikolov <nikolov.tmw@gmail.com>
+ * @copyright Copyleft (?) 2012-2013, Nikola Nikolov
+ * @license {@link http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3}
+ * @since 0.1
+ */
 
-$GLOBALS['_scb_data'] = array( 57, __FILE__, array(
-	'scbUtil', 'scbOptions', 'scbForms', 'scbTable',
-	'scbWidget', 'scbAdminPage', 'scbBoxesPage',
-	'scbCron', 'scbHooks',
+$GLOBALS['_scb_MLWP_data'] = array( 57, __FILE__, array(
+	'scb_MLWP_Util', 'scb_MLWP_Options', 'scb_MLWP_Forms', 
+	'scb_MLWP_Widget', 'scb_MLWP_AdminPage',
 ) );
 
-if ( !class_exists( 'scbLoad4' ) ) :
+if ( ! class_exists( 'scb_MLWP_Load4' ) ) :
 /**
- * The main idea behind this class is to load the most recent version of the scb classes available.
+ * The main idea behind this class is to load the most recent version of the scb_MLWP_ classes available.
  *
  * It waits until all plugins are loaded and then does some crazy hacks to make activation hooks work.
  */
-class scbLoad4 {
+class scb_MLWP_Load4 {
 
 	private static $candidates = array();
 	private static $classes;
@@ -21,7 +36,7 @@ class scbLoad4 {
 	private static $loaded;
 
 	static function init( $callback = '' ) {
-		list( $rev, $file, $classes ) = $GLOBALS['_scb_data'];
+		list( $rev, $file, $classes ) = $GLOBALS['_scb_MLWP_data'];
 
 		self::$candidates[$file] = $rev;
 		self::$classes[$file] = $classes;
@@ -48,7 +63,7 @@ class scbLoad4 {
 			if ( dirname( dirname( plugin_basename( $file ) ) ) == $plugin_dir ) {
 				self::load( false );
 				call_user_func( $callback );
-				do_action( 'scb_activation_' . $plugin );
+				do_action( 'scb_MLWP_activation_' . $plugin );
 				break;
 			}
 		}
@@ -65,7 +80,7 @@ class scbLoad4 {
 			if ( class_exists( $class_name ) )
 				continue;
 
-			$fpath = $path . substr( $class_name, 3 ) . '.php';
+			$fpath = $path . substr( $class_name, 9 ) . '.php';
 			if ( file_exists( $fpath ) ) {
 				include $fpath;
 				self::$loaded[] = $fpath;
@@ -85,9 +100,9 @@ class scbLoad4 {
 }
 endif;
 
-if ( !function_exists( 'scb_init' ) ) :
-function scb_init( $callback = '' ) {
-	scbLoad4::init( $callback );
+if ( !function_exists( 'scb_MLWP_init' ) ) :
+function scb_MLWP_init( $callback = '' ) {
+	scb_MLWP_Load4::init( $callback );
 }
 endif;
 

@@ -1,8 +1,22 @@
 <?php
+/**
+ * Container for an array of options
+ * 
+ * This file is part of the {@link https://github.com/scribu/wp-scb-framework wp-scb-framework}. It has been modified
+ * in order to better fit the plugin and avoid collisions because of
+ * those changes.
+ *
+ * @package Multilingual WP
+ * @subpackage wp-scb-framework
+ * @author {@link https://github.com/scribu scribu[Cristi Burcă]}
+ * @author {@link https://github.com/Rarst Rarst}
+ * @author Nikola Nikolov <nikolov.tmw@gmail.com>
+ * @copyright Copyleft (?) 2012-2013, Nikola Nikolov
+ * @license {@link http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3}
+ * @since 0.1
+ */
 
-// Container for an array of options
-
-class scbOptions {
+class scb_MLWP_Options {
 
 	protected $key;		// the option name
 
@@ -22,8 +36,8 @@ class scbOptions {
 		$this->defaults = $defaults;
 
 		if ( $file ) {
-			scbUtil::add_activation_hook( $file, array( $this, '_activation' ) );
-			scbUtil::add_uninstall_hook( $file, array( $this, 'delete' ) );
+			scb_MLWP_Util::add_activation_hook( $file, array( $this, '_activation' ) );
+			scb_MLWP_Util::add_uninstall_hook( $file, array( $this, 'delete' ) );
 		}
 	}
 
@@ -43,7 +57,7 @@ class scbOptions {
 	public function get( $field = null, $default = null ) {
 		$data = array_merge( $this->defaults, get_option( $this->key, array() ) );
 
-		return scbForms::get_value( $field, $data, $default );
+		return scb_MLWP_Forms::get_value( $field, $data, $default );
 	}
 
 	/**
@@ -53,7 +67,7 @@ class scbOptions {
 	 * @return mixed Whatever is in those fields
 	 */
 	public function get_defaults( $field = null ) {
-		return scbForms::get_value( $field, $this->defaults );
+		return scb_MLWP_Forms::get_value( $field, $this->defaults );
 	}
 
 	/**

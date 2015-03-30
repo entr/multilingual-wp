@@ -1,19 +1,72 @@
 <?php
+/**
+ * Creates GUI for adding new languages
+ *
+ * @package Multilingual WP
+ * @author Nikola Nikolov <nikolov.tmw@gmail.com>
+ * @copyright Copyleft (?) 2012-2013, Nikola Nikolov
+ * @license {@link http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3}
+ * @since 0.1
+ */
 
-class Multilingual_WP_Add_Language_Page extends scbAdminPage {
-	protected $textdomain = 'multilingual-wp';
+class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 	protected $admin_notice = false;
+	protected $force_mo_update = false;
 	public $admin_errors = array();
+
+	public function setup() {
+		$this->args = array(
+			'page_title' => __( 'Add New Language', 'multilingual-wp' ),
+			'parent' => 'multilingual-wp',
+			'action_link' => false,
+			'screen_icon' => 'mlwp_add_language'
+		);
+
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
+
+		add_action( 'load-multilingual-wp_page_add-new-language', array( $this, 'form_handler' ), 100 );
+	}
+
+	public function enqueue_scripts( $handle ) {
+		if ( 'multilingual-wp_page_add-new-language' == $handle ) {
+			global $wp_version;
+
+			if ( version_compare( $wp_version, '3.5', '>=' ) ) {
+				if ( ! did_action( 'wp_enqueue_media' ) ) {
+					wp_enqueue_media();
+				}
+
+				wp_enqueue_script( 'multilingual-wp-settings-js', $this->plugin_url . 'js/multilingual-wp-settings.js', array( 'jquery' ), null, true );
+			} else {
+				wp_enqueue_script( 'multilingual-wp-settings-js', $this->plugin_url . 'js/multilingual-wp-settings.js', array( 'jquery', 'thickbox' ), null, true );
+				wp_enqueue_style( 'thickbox-css' );
+			}
+
+			wp_enqueue_style( 'multilingual-wp-settings-css', $this->plugin_url . 'css/multilingual-wp-settings.css' );
+		}
+	}
 
 	public function _page_content_hook() {
 		if ( $this->admin_notice ) {
 			$this->admin_msg( $this->admin_notice );
 		}
-		if ( $this->admin_errors ) {
-			$this->admin_errors();
-		}
 
-		$this->page_header();
+		$this->page_header( 'mlwp-add-new-wrap' );
+
+		if ( $this->force_mo_update != false ) {
+			if ( apply_filters( 'mlwp_flush_mo_msg', true ) ) {
+				@ob_end_flush();
+				@ob_flush();
+			}
+
+			$success = _mlwp()->update_gettext( true, $this->force_mo_update );
+			if ( $success ) {
+				$this->admin_msg( sprintf( __( 'Yay! We successfully downloaded the following .mo files: <br /> - %s', 'multilingual-wp' ), implode( '<br /> - ', $success ) ), 'mlwp-success' );
+			} else {
+				$this->admin_msg( sprintf( __( 'Oh snap! We were unable to get the .mo files for the %1$s language :( Please try <a target="_blank" href="%2$s">downloading them manually</a>.', 'multilingual-wp' ), $this->options->languages[ $this->force_mo_update ]['label'], 'http://codex.wordpress.org/WordPress_in_Your_Language' ), 'mlwp-error nofade' );
+			}
+		}
+		
 		$this->page_content();
 		$this->page_footer();
 	}
@@ -43,14 +96,11 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 		if ( ! $data['icon'] ) {
 			$errors[] = 'Please select the <code>Language Flag</code> for this language.';
 		}
-		if ( ! $data['na_message'] ) {
-			$errors[] = 'Please enter the <code>Not Available Message</code> for this language.';
-		}
 
 		if ( empty( $errors ) ) {
 			global $Multilingual_WP;
 
-			$langs = $Multilingual_WP->get_options( 'languages' );
+			$langs = $this->options->languages;
 			
 			// Trim the language ID - this could go away in the future
 			$id = substr( $data['id'], 0, 2 );
@@ -60,54 +110,17 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 			} else {
 				unset( $data['id'] );
 				$langs[ $id ] = $data;
-				$Multilingual_WP->get_options()->languages = $langs;
+				$this->options->languages = $langs;
 
-				$this->admin_notice = sprintf( __( 'The language "%s" has been added.', 'multilingual-wp' ), $data['label'] );
+				$this->admin_notice = sprintf( __( 'The language "%s" has been added.<br />Hold on, while we\'re grabbing the .mo files for you.', 'multilingual-wp' ), $data['label'] );
+				$this->force_mo_update = $id;
 			}
 		}
 
 		$this->admin_errors = $errors;
 	}
 
-	public function setup() {
-		$this->args = array(
-			'page_title' => __( 'Add New Language', 'multilingual-wp' ),
-			'parent' => 'multilingual-wp'
-		);
-
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 10 );
-
-		add_action( 'load-multilingual-wp_page_add-new-language', array( $this, 'form_handler' ), 100 );
-	}
-
-	public function enqueue_scripts( $handle ) {
-		if ( 'multilingual-wp_page_add-new-language' == $handle ) {
-			global $wp_version;
-
-			if ( version_compare( $wp_version, '3.5', '>=' ) ) {
-				if ( ! did_action( 'wp_enqueue_media' ) ) {
-					wp_enqueue_media();
-				}
-
-				wp_enqueue_script( 'multilingual-wp-settings-js', $this->plugin_url . 'js/multilingual-wp-settings.js', array( 'jquery' ), null, true );
-			} else {
-				wp_enqueue_script( 'multilingual-wp-settings-js', $this->plugin_url . 'js/multilingual-wp-settings.js', array( 'jquery', 'thickbox' ), null, true );
-				wp_enqueue_style( 'thickbox-css' );
-			}
-
-			wp_enqueue_style( 'multilingual-wp-settings-css', $this->plugin_url . 'css/multilingual-wp-settings.css' );
-		}
-	}
-
-	public function page_header() {
-		echo "<div class='wrap mlwp-wrap mlwp-add-new-wrap'>\n";
-		screen_icon( $this->args['screen_icon'] );
-		echo html( "h2", $this->args['page_title'] );
-	}
-
 	public function page_content() {
-		$languages = $this->options->languages;
-
 		// We want to put all of the output in a single <form>
 		ob_start();
 
@@ -138,7 +151,7 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 				'extra' => array( 'maxlength' => '2', 'class' => 'regular-text' )
 			),
 			array(
-				'title' => __( 'Not Available Message <span class="required">*</span>', 'multilingual-wp' ),
+				'title' => __( 'Not Available Message', 'multilingual-wp' ),
 				'type' => 'textarea',
 				'name' => "language[na_message]",
 				'desc' => __( 'Enter the message that will be displayed when the requested post/page is not available in this language.', 'multilingual-wp' ),
@@ -166,10 +179,17 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 				'value' => 'antarctica.png',
 				'extra' => array( 'class' => 'regular-text mlwp_flag_input' )
 				// 'render' => array( $this, 'render_lf_dd' )
-			)
+			),
+			array(
+				'title' => __( 'Language Order', 'multilingual-wp' ),
+				'type' => 'text',
+				'name' => "language[order]",
+				'desc' => __( 'Enter the position in which this language should appear( smallest to largest ).', 'multilingual-wp' ),
+				'value' => count( $this->options->languages )
+			),
 		) );
 
-		echo $this->form_wrap( ob_get_clean() );
+		echo $this->form_wrap( ob_get_clean(), array( 'value' => __( 'Add New Language', 'multilingual-wp' ) ) );
 	}
 
 	public function start_box( $title, $id = false, $closed = true ) {
@@ -194,8 +214,6 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 				</div>
 			</div>';
 	}
-	// public function add_new_tab() {
-	// }
 
 	public function page_footer() {
 		global $MULTILINGUAL_WP_FLAGS, $wp_version;
@@ -226,17 +244,5 @@ class Multilingual_WP_Add_Language_Page extends scbAdminPage {
 		</div>
 <?php
 		parent::page_footer();
-	}
-
-	public function admin_errors( $errors = false ) {
-		$errors = $errors ? $errors : $this->admin_errors;
-
-		if ( $errors ) {
-			$errors = is_array( $errors ) ? implode( "\n\n", $errors ) : $errors; ?> 
-			<div class="error">
-				<?php echo wpautop( $errors ); ?>
-			</div>
-		<?php 
-		}
 	}
 }

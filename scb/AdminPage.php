@@ -1,8 +1,22 @@
 <?php
+/**
+ * Administration page base class
+ * 
+ * This file is part of the {@link https://github.com/scribu/wp-scb-framework wp-scb-framework}. It has been modified
+ * in order to better fit the plugin and avoid collisions because of
+ * those changes.
+ *
+ * @package Multilingual WP
+ * @subpackage wp-scb-framework
+ * @author {@link https://github.com/scribu scribu[Cristi Burcă]}
+ * @author {@link https://github.com/Rarst Rarst}
+ * @author Nikola Nikolov <nikolov.tmw@gmail.com>
+ * @copyright Copyleft (?) 2012-2013, Nikola Nikolov
+ * @license {@link http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3}
+ * @since 0.1
+ */
 
-// Administration page base class
-
-abstract class scbAdminPage {
+abstract class scb_MLWP_AdminPage {
 	/** Page args
 	 * $page_title string (mandatory)
 	 * $parent (string)  (default: options-general.php)
@@ -26,13 +40,15 @@ abstract class scbAdminPage {
 	// Created at page init
 	protected $pagehook;
 
-	// scbOptions object holder
+	// scb_MLWP_Options object holder
 	// Normally, it's used for storing formdata
 	protected $options;
 	protected $option_name;
 
 	// l10n
-	protected $textdomain;
+	protected $textdomain = 'multilingual-wp';
+
+	public $admin_errors = array();
 
 
 //  ____________REGISTRATION COMPONENT____________
@@ -81,7 +97,7 @@ abstract class scbAdminPage {
 
 	// Constructor
 	function __construct( $file = false, $options = null ) {
-		if ( is_a( $options, 'scbOptions' ) )
+		if ( is_a( $options, 'scb_MLWP_Options' ) )
 			$this->options = $options;
 
 		$this->setup();
@@ -124,10 +140,12 @@ abstract class scbAdminPage {
 	function page_help(){}
 
 	// A generic page header
-	function page_header() {
-		echo "<div class='wrap'>\n";
+	function page_header( $add_class = '' ) {
+		echo "<div class='wrap mlwp-wrap {$add_class}'>\n";
 		screen_icon( $this->args['screen_icon'] );
 		echo html( "h2", $this->args['page_title'] );
+
+		$this->admin_errors();
 	}
 
 	// This is where the page content goes
@@ -167,24 +185,33 @@ abstract class scbAdminPage {
 	}
 
 	// Manually generate a standard admin notice ( use Settings API instead )
-	function admin_msg( $msg = '', $class = "updated" ) {
+	function admin_msg( $msg = '', $class = "updated", $fade_time = '', $not_updated = false ) {
 		if ( empty( $msg ) )
-			$msg = __( 'Settings <strong>saved</strong>.', $this->textdomain );
+			$msg = __( 'Settings <strong>saved</strong>.', 'multilingual-wp' );
 
-		echo scb_admin_notice( $msg, $class );
+		echo scb_MLWP_admin_notice( $msg, $class, $fade_time, $not_updated );
 	}
 
+	public function admin_errors( $errors = false ) {
+		$errors = $errors ? $errors : $this->admin_errors;
+
+		if ( $errors ) {
+			$errors = is_array( $errors ) ? implode( "\n\n", $errors ) : $errors;
+			$this->admin_msg( wpautop( $errors ), 'mlwp-error nofade' );
+		}
+	}
 
 //  ____________UTILITIES____________
 
 
 	// Generates a form submit button
-	function submit_button( $value = '', $action = 'action', $class = "button" ) {
+	function submit_button( $value = '', $action = 'action', $class = "button-primary", $wrap = true ) {
+		$wrap = $wrap === true ? html( 'p class="submit"', scb_MLWP_Forms::TOKEN ) : '';
 		if ( is_array( $value ) ) {
 			extract( wp_parse_args( $value, array(
-				'value' => __( 'Save Changes', $this->textdomain ),
+				'value' => __( 'Save Changes', 'multilingual-wp' ),
 				'action' => 'action',
-				'class' => 'button',
+				'class' => 'button-primary',
 				'ajax' => true
 			) ) );
 
@@ -193,7 +220,7 @@ abstract class scbAdminPage {
 		}
 		else {
 			if ( empty( $value ) )
-				$value = __( 'Save Changes', $this->textdomain );
+				$value = __( 'Save Changes', 'multilingual-wp' );
 		}
 
 		$input_args = array(
@@ -201,18 +228,20 @@ abstract class scbAdminPage {
 			'name' => $action,
 			'value' => $value,
 			'extra' => '',
-			'desc' => false,
-			'wrap' => html( 'p class="submit"', scbForms::TOKEN )
+			'desc' => false
 		);
+		if ( $wrap ) {
+			$input_args['wrap'] = $wrap;
+		}
 
 		if ( ! empty( $class ) )
 			$input_args['extra'] = compact( 'class' );
 
-		return scbForms::input( $input_args );
+		return scb_MLWP_Forms::input( $input_args );
 	}
 
 	/*
-	Mimics scbForms::form_wrap()
+	Mimics scb_MLWP_Forms::form_wrap()
 
 	$this->form_wrap( $content );	// generates a form with a default submit button
 
@@ -236,7 +265,7 @@ abstract class scbAdminPage {
 			$content .= call_user_func_array( array( $this, 'submit_button' ), $button_args );
 		}
 
-		return scbForms::form_wrap( $content, $this->nonce );
+		return scb_MLWP_Forms::form_wrap( $content, $this->nonce );
 	}
 
 	// Generates a table wrapped in a form
@@ -248,7 +277,6 @@ abstract class scbAdminPage {
 		if ( $wrap ) {
 			$output = $this->form_table_wrap( $output );
 		}
-		// var_dump($wrap);
 
 		return $output;
 	}
@@ -277,7 +305,7 @@ abstract class scbAdminPage {
 		return $this->row_wrap( $args['title'], $this->input( $args, $formdata ) );
 	}
 
-	// Mimic scbForms inheritance
+	// Mimic scb_MLWP_Forms inheritance
 	function __call( $method, $args ) {
 		if ( in_array( $method, array( 'input', 'form' ) ) ) {
 			if ( empty( $args[1] ) && isset( $this->options ) )
@@ -287,7 +315,7 @@ abstract class scbAdminPage {
 				$args[2] = $this->nonce;
 		}
 
-		return call_user_func_array( array( 'scbForms', $method ), $args );
+		return call_user_func_array( array( 'scb_MLWP_Forms', $method ), $args );
 	}
 
 	// Wraps a string in a <script> tag
@@ -346,7 +374,7 @@ abstract class scbAdminPage {
 			'menu_title' => $this->args['page_title'],
 			'page_slug' => '',
 			'nonce' => '',
-			'action_link' => __( 'Settings', $this->textdomain ),
+			'action_link' => __( 'Settings', 'multilingual-wp' ),
 			'ajax_submit' => false,
 			'admin_action_priority' => 10,
 		) );

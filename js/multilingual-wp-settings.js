@@ -3,6 +3,21 @@
 		base_url;
 
 	$(document).ready(function(){
+		$('.mlwp-box.fade').each(function(){
+			var th = $(this);
+			if ( ! th.hasClass('nofade') ) {
+				var timeout = 8;
+				if ( th.attr('data-fade') ) {
+					timeout = parseInt( th.attr('data-fade') );
+				};
+				setTimeout( function(){
+					th.slideUp( function(){
+						th.remove();
+					} );
+				}, timeout * 1000 );
+			};
+		})
+
 		base_url = $('img.lang_icon:eq(0)').attr('src').replace(/(.*flags\/24\/).*/, '$1');
 		if ( ! wp_35_media ) {
 			tb_position();
@@ -18,16 +33,16 @@
 				}
 
 				wp.media.editor.open(button);
-				return false;
+				e.preventDefault();
 			});
 		};
 
 		init_js_tabs();
 
-		$('.wrap .postbox .handlediv,.wrap .postbox .hndle').on('click', function(){
+		$('.wrap .postbox .handlediv,.wrap .postbox .hndle').on('click', function(e){
 			$(this).siblings(".inside").toggle();
 
-			return false;
+			e.preventDefault();
 		});
 
 		var forms = document.getElementsByTagName('form');
@@ -82,7 +97,7 @@
 		$('#flag_size_select').on('change', function(){
 			var th = $(this),
 				val = th.val();
-			th.parent('label').find('img').animate( { 'width': val, 'height': val } ).attr( 'src', ( th.parent('label').find('img').attr('src').replace( /flags\/\d\d/, 'flags/' + val ) ) );
+			th.parent('label').find('img').animate( { 'width': val } ).attr( 'src', ( th.parent('label').find('img').attr('src').replace( /flags\/\d\d/, 'flags/' + val ) ) );
 		})
 	})
 
@@ -104,19 +119,19 @@
 			nav.append("<span>&nbsp;&nbsp;</span>");
 
 			for(i in tabs) {
-				el = '<a href="#' + tabs[i].id + '" class="nav-tab">' + tabs[i].title + '</a>';
+				el = '<a href="#mlwp_' + tabs[i].id + '" class="nav-tab">' + tabs[i].title + '</a>';
 				nav.append(el);
 			}
 
-			$(".js-tabs-nav a").click(function() {
+			$(".js-tabs-nav a").click(function(e) {
 				var th = $(this);
 				$(".js-tab").hide();
-				$( th.attr("href") ).show();
+				$( th.attr("href").replace(/mlwp_/, '') ).show();
 
 				th.addClass("nav-tab-active").siblings().removeClass("nav-tab-active");
 				$('.mlwp-wrap form').attr('action', th.attr('href') );
 
-				// return false;
+				// return e.preventDefault();
 			}).eq(0).click();
 		}
 		if ( window.location.hash ) {
