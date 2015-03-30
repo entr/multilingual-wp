@@ -3672,6 +3672,7 @@ class Multilingual_WP {
 			'return' => false,
 			'hide_current' => false,
 			'flag_size' => self::$options->dfs,
+			'text_mode' => 'name'
 		);
 
 		$result = apply_filters( 'mlwp_lang_switcher_pre', false, $options, $defaults );
@@ -3684,6 +3685,8 @@ class Multilingual_WP {
 		extract( $options, EXTR_SKIP );
 
 		$type = in_array( $type, array( 'image', 'text', 'both', 'select', 'dropdown' ) ) ? $type : 'image';
+		if ( in_array( $type, array( 'text', 'both' ) ) )
+			$text_mode = in_array( $text_mode, array( 'name', 'code' ) ) ? $text_mode : 'name';
 
 		$flag_size = $flag_size && in_array( intval( $flag_size ), array( 16, 24, 32, 48, 64 ) ) ? $flag_size : self::$options->dfs;
 
@@ -3751,7 +3754,7 @@ class Multilingual_WP {
 
 			$html .= $type == 'image' || $type == 'both' ? "<img src='{$data['image']}' alt='{$data['label']}' />" : '';
 
-			$html .= $type == 'text' || $type == 'both' ? "<span class='mlwp_lang_label'>{$data['label']}</span>" : ( $type == 'dd' ? $data['label'] : '' );
+			$html .= $type == 'text' || $type == 'both' ? "<span class='mlwp_lang_label'>" . ( $text_mode == 'code' ? strtoupper($lang) : $data['label'] ) . "</span>" : ( $type == 'dd' ? $data['label'] : '' );
 
 			$html .= in_array( $type, array( 'image', 'text', 'both' ) ) ? '</a>' : '';
 
