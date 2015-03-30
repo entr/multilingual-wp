@@ -602,6 +602,8 @@ class Multilingual_WP {
 			add_action( 'submitpost_box',              array( $this, 'insert_editors' ), 0 );
 			add_action( 'submitpage_box',              array( $this, 'insert_editors' ), 0 );
 
+			add_filter( 'wp_editor_expand', 					 array( $this, 'disable_editor_expand' ), 10, 2 );
+
 			foreach ( self::$options->enabled_tax as $tax ) {
 				add_action( "{$tax}_edit_form_fields", array( $this, 'edit_tax_fields' ), 0, 2 );
 			}
@@ -3228,6 +3230,21 @@ class Multilingual_WP {
 			// Update the related languages data
 			$this->set_term_langs( $this->term_ID, $this->rel_t_langs );
 		}
+	}
+
+	/**
+	 * Disable WP4 editor-expand feature in enabled post types.
+	 * 
+	 * @param bool   $expand    Whether to enable the 'expand' functionality. Default true.
+	 * @param string $post_type Post type.
+	 * @return bool   $expand
+	 */
+	public function disable_editor_expand( $expand, $post_type ) {
+		if ( $expand && $this->is_enabled_pt( $post_type ) ) {
+			$expand = false;
+		}
+
+		return $expand;
 	}
 
 	public function insert_editors() {
