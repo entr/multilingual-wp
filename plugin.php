@@ -501,6 +501,7 @@ class Multilingual_WP {
 		// Post URL's rewriting
 		add_filter( 'page_link',                       array( $this, 'convert_post_URL' ), $this->late_fp, 2 );
 		add_filter( 'post_link',                       array( $this, 'convert_post_URL' ),	$this->late_fp, 2 );
+		add_filter( 'post_type_link',									 array( $this, 'gen_post_type_link' ), 0, 4 );
 
 		// Term URL's rewriting
 		add_filter( 'category_link',                   array( $this, 'convert_term_URL' ), $this->late_fp, 3 );
@@ -2042,6 +2043,33 @@ class Multilingual_WP {
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Filters generated post_type links so they point to actual translated page.
+	 * 
+	 * @param string  $post_link The post's permalink.
+	 * @param WP_Post $post      The post in question.
+	 * @param bool    $leavename Whether to keep the post name.
+	 * @param bool    $sample    Is it a sample permalink.
+	 * @return string  $post_link
+	 */
+	public function gen_post_type_link( $post_link, $post, $leavename, $sample ) {
+		
+		if ( $this->is_gen_pt( $post->post_type ) && false !== strpos( 'draft', $post->post_status ) && ( '' != $orig_id = get_post_meta( $post->ID, $this->rel_p_meta_key, true ) ) ) {
+
+			$orig_post_lang_meta = $this->get_rel_langs( $orig_id, 'post' );
+			if ( ! empty( $orig_post_lang_meta ) ) {
+				$ids = array_values( $orig_post_lang_meta );
+				$codes = array_keys(  $orig_post_lang_meta );
+
+				if ( false !== ( $code_key = array_search( $post->ID, $ids ) ) ) {
+					$post_link = $this->convert_URL( get_permalink( $orig_id ), $codes[$code_key] );
+				}
+			}
+		}
+
+		return $post_link;
 	}
 
 	public function is_gen_pt( $post_type ) {
