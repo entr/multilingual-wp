@@ -2366,7 +2366,11 @@ class Multilingual_WP {
 	 */
 	public function gen_post_type_link( $post_link, $post, $leavename, $sample ) {
 		
-		if ( $this->is_gen_pt( $post->post_type ) && false !== strpos( 'draft', $post->post_status ) && ( '' != $orig_id = get_post_meta( $post->ID, $this->rel_p_meta_key, true ) ) ) {
+		$valid_statues = array('publish');
+		if ( is_user_logged_in() )
+			$valid_statues[] = 'private';
+
+		if ( $this->is_gen_pt( $post->post_type ) && in_array( $post->post_status, $valid_statues ) && ( '' != $orig_id = get_post_meta( $post->ID, $this->rel_p_meta_key, true ) ) ) {
 
 			$orig_post_lang_meta = $this->get_rel_langs( $orig_id, 'post' );
 			if ( ! empty( $orig_post_lang_meta ) ) {
