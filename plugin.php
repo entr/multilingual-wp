@@ -434,11 +434,16 @@ class Multilingual_WP {
 			self::$options->lang_mode = $this->lang_mode = self::LT_QUERY;
 		}
 
+		$prefix = defined('SCRIPT_DEBUG') && SCRIPT_DEBUG ? '' : '.min';
+ 
 		wp_register_script( 'multilingual-wp-js', $this->plugin_url . 'js/multilingual-wp.js', array( 'jquery', 'schedule', 'word-count' ), false, true );
 		wp_register_script( 'multilingual-wp-autosave-js', $this->plugin_url . 'js/multilingual-wp-autosave.js', array( 'multilingual-wp-js', 'autosave' ), false, true );
 		wp_register_script( 'multilingual-wp-tax-js', $this->plugin_url . 'js/multilingual-wp-tax.js', array( 'jquery' ), false, true );
 
 		wp_register_style( 'multilingual-wp-css', $this->plugin_url . 'css/multilingual-wp.css' );
+
+		if ( ! wp_style_is( 'flag-icon', 'registered' ) )
+			wp_register_style( 'flag-icon', $this->plugin_url . "css/flag-icon{$prefix}.css", array(), '0.7.0' );
 
 		$this->add_filters();
 

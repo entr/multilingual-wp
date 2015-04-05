@@ -44,6 +44,7 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 			}
 
 			wp_enqueue_style( 'multilingual-wp-settings-css', $this->plugin_url . 'css/multilingual-wp-settings.css' );
+			wp_enqueue_style( 'flag-icon' );
 		}
 	}
 
