@@ -1,0 +1,7 @@
+# NPM
+/node_modules
+
+# Bower
+/bower_components
+/flags/*/*.svg
+/css/flag-icon*

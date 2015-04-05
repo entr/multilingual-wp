@@ -1,0 +1,31 @@
+{
+  "name": "multilingual-wp",
+  "version": "1.0.0",
+  "description": "=== Multilingual WP === Contributors: nikolov.tmw Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8FGREYJJA4FE Tags: multilingual, translations, content Requires at least: 3.5 Tested up to: 3.5.2 Stable tag: 0.1.2.1",
+  "main": "plugin.php",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/entr/multilingual-wp.git"
+  },
+  "keywords": [
+    "multilingual",
+    "translations",
+    "content"
+  ],
+  "author": "",
+  "license": "GPL2+",
+  "bugs": {
+    "url": "https://github.com/entr/multilingual-wp/issues"
+  },
+  "homepage": "https://github.com/entr/multilingual-wp",
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-bower-task": "^0.4.0",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-less": "^1.0.0",
+    "jit-grunt": "^0.9.1"
+  }
+}

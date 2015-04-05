@@ -1,0 +1,33 @@
+{
+  "name": "multilingual-wp",
+  "version": "0.1.2",
+  "homepage": "https://github.com/entr/multilingual-wp",
+  "description": "=== Multilingual WP === Contributors: nikolov.tmw Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8FGREYJJA4FE Tags: multilingual, translations, content Requires at least: 3.5 Tested up to: 3.5.2 Stable tag: 0.1.2.1",
+  "authors": [
+    "Nikola Nikolov <nikolov.tmw@gmail.com>",
+    "Zlatko Zlatev <zlatko@ralev.com>"
+  ],
+  "keywords": [
+    "multilingual",
+    "translations",
+    "content"
+  ],
+  "license": "GPL2+",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "flag-icon-css": "https://github.com/lipis/flag-icon-css.git#~0.7.0"
+  },
+  "exportsOverride": {
+    "flag-icon-css": {
+      "svg": "flags/**/*.svg",
+      "css": "css/*.css"
+    }
+  }
+}
