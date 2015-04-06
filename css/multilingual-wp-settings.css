@@ -23,3 +23,11 @@ div.mlwp-box p { margin: .5em 0; padding: 2px; }
 div.mlwp-box.mlwp-notice { /* background-color: #E0F1FF; */ border-color: #8497DF; }
 div.mlwp-box.mlwp-success { /* background-color: #96F1B3; */ border-color: #7AD03A; }
 div.mlwp-box.mlwp-error { /* background-color: #FFCACA; */ border-color: #DD3D36; font-weight: bold; }
+
+/**
+ * Select2
+ */
+
+div#wpbody-content .mlwp-wrap .select2-container .select2-choice > .select2-chosen {
+  width: 22.5em;
+}

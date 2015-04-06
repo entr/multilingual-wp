@@ -56,35 +56,26 @@
 			forms[i].reset();
 		}
 
-		$('.mlwp_flag_input').focus(function(){
-			var th = $(this),
-				flag_select = $('#mlwp_flag_select'),
-				left = th.offset().left,
-				top = th.offset().top,
-				fs_h = flag_select.outerHeight(),
-				fs_w = flag_select.outerWidth(),
-				sel_input = $('#mlwp_flag_select input[value="' + th.val() + '"]');
+		if ( typeof $.fn.select2 != 'undefined' ) {
+			
+			function flag_input_format(object, container, query) {
+				var icon = '', item = '';
+				if ( _wpml_flags[object.id] ) {
+					var code = object.id.split('.')[0];
+					icon = "<i class='flag-icon flag-icon-" + code + "'></i>";
+				}
 
-			if ( $('#mlwp_flag_select:visible').length ) {
-				flag_select.hide();
-			};
-			$('#mlwp_flag_select label').removeClass('selected');
-			if ( sel_input.length ) {
-				sel_input.attr('checked', 'checked').parent('label').addClass('selected');
-			};
-			
-			flag_select.css({
-				"left": ( left - ( fs_w / 2 ) ) + 'px',
-				"top": top + 'px'
+				item = icon + ' ' + object.text
+				return item;
+			}
+
+			$('.mlwp_flag_input').prepend('<option></option>').select2({
+				formatResult: flag_input_format,
+				formatSelection: flag_input_format,
+				placeholder: _mlwp_flag_input.placeholder,
+				minimumInputLength: 2
 			});
-			
-			flag_select.slideDown(function(){
-				if ( sel_input.length ) {
-					var st = sel_input.parent('label').position();
-					$('.postbox .inside', flag_select).animate( { 'scrollTop': st.top }, 700 );
-				};
-			}).data('rel_input', th.attr('name'));
-		});
+		}
 
 		$('.lang_radio').on('change', function(){
 			$('#mlwp_flag_select label').removeClass('selected');

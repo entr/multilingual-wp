@@ -30,7 +30,7 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 
 	public function enqueue_scripts( $handle ) {
 		if ( 'toplevel_page_multilingual-wp' == $handle ) {
-			global $wp_version;
+			global $wp_version, $MLWP_FLAGS;
 
 			if ( version_compare( $wp_version, '3.5', '>=' ) ) {
 				if ( ! did_action( 'wp_enqueue_media' ) ) {
@@ -45,6 +45,18 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 
 			wp_enqueue_style( 'multilingual-wp-settings-css', $this->plugin_url . 'css/multilingual-wp-settings.css' );
 			wp_enqueue_style( 'flag-icon' );
+
+			/**
+			 * Enqueue Select2
+			 */
+			wp_enqueue_script( 'jquery-select2' );
+			wp_enqueue_script( 'jquery-select2-locale' );
+			wp_enqueue_style( 'jquery-select2' );
+
+			wp_localize_script( 'multilingual-wp-settings-js', '_wpml_flags', $MLWP_FLAGS );
+			wp_localize_script( 'multilingual-wp-settings-js', '_mlwp_flag_input', array(
+					'placeholder' => __( 'Select a flag', 'multilingual-wp' )
+				) );
 		}
 	}
 
@@ -270,7 +282,8 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 		$lang_mode = $this->options->lang_mode;
 
 		foreach ( $languages as $lang => $data ) {
-			$l_opts[ $lang ] = '<img style="margin-bottom:-9px;padding:4px 5px;" src="' . _mlwp()->get_flag( $lang, 24 ) . '" alt="' . esc_attr( $data['label'] ) . '" /> ' . $data['label'] . '<br />';
+			// $l_opts[ $lang ] = '<img style="margin-bottom:-9px;padding:4px 5px;" src="' . _mlwp()->get_flag( $lang, 24 ) . '" alt="' . esc_attr( $data['label'] ) . '" /> ' . $data['label'] . '<br />';
+			$l_opts[ $lang ] =  sprintf( '<i class="flag-icon flag-icon-%s" alt="%s"></i>', $lang, esc_attr( $data['label'] ) ) . '<br>';
 		}
 		foreach ( $this->options->enabled_langs as $lang ) {
 			$enabled_langs_opts[ $lang ] = $languages[ $lang ]['label'];
@@ -388,6 +401,7 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 
 		$this->admin_msg( __( 'Here you can change the settings for each supported language.', 'multilingual-wp' ), 'mlwp-notice nofade', '', true );
 
+		global $MLWP_FLAGS;
 		foreach ($languages as $lang => $data) {
 			$this->start_box( $data['label'] );
 
@@ -408,10 +422,11 @@ class Multilingual_WP_Settings_Page extends scb_MLWP_AdminPage {
 				),
 				array(
 					'title' => __( 'Language Flag <span class="required">*</span>', 'multilingual-wp' ),
-					'type' => 'text',
+					'type' => 'select',
 					'name' => "languages[$lang][icon]",
 					'desc' => __( 'Select the flag that will represent this language. The current flag is <img src="' . $this->plugin_url . 'flags/24/' . $data['icon'] . '" class="lang_icon" alt="" />', 'multilingual-wp' ),
 					'value' => $data['icon'],
+					'choices' => $MLWP_FLAGS,
 					'extra' => array( 'class' => 'regular-text mlwp_flag_input' )
 				),
 				array(

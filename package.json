@@ -4,7 +4,8 @@
   "description": "=== Multilingual WP === Contributors: nikolov.tmw Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=S8FGREYJJA4FE Tags: multilingual, translations, content Requires at least: 3.5 Tested up to: 3.5.2 Stable tag: 0.1.2.1",
   "main": "plugin.php",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "bower install && grunt bower"
   },
   "repository": {
     "type": "git",

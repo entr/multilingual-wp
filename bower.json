@@ -17,17 +17,22 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "bower_components",
-    "test",
-    "tests"
+    "bower_components"
   ],
   "devDependencies": {
-    "flag-icon-css": "https://github.com/lipis/flag-icon-css.git#~0.7.0"
+    "flag-icon-css": "https://github.com/lipis/flag-icon-css.git#~0.7.0",
+    "select2": "https://github.com/select2/select2.git"
   },
   "exportsOverride": {
     "flag-icon-css": {
       "svg": "flags/**/*.svg",
       "css": "css/*.css"
-    }
+    },
+    "select2": {
+      "css": "**/*.css",
+      "js": "**/*.js",
+      "asset": ["*.png","*.gif"]
+    },
+    "jquery": {}
   }
 }

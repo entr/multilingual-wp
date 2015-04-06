@@ -445,6 +445,31 @@ class Multilingual_WP {
 		if ( ! wp_style_is( 'flag-icon', 'registered' ) )
 			wp_register_style( 'flag-icon', $this->plugin_url . "css/flag-icon{$prefix}.css", array(), '0.7.0' );
 
+		/**
+		 * Register Select2 assets.
+		 */
+		if ( apply_filters( 'mlwp_register_select2_assets', true ) ) {
+
+			if ( ! wp_script_is( 'jquery-select2', 'registered' ) )
+				wp_register_script( 'jquery-select2', $this->plugin_url . "js/select2/select2{$prefix}.js", array( 'jquery' ), '3.5.2', true );
+
+			$js_locale = str_replace( '_', '-', get_locale() ) ;
+			$js_locale_short = strtolower( reset( explode('-', $js_locale) ) );
+
+			$plugin_dir = plugin_dir_path( __FILE__ );
+
+			if ( file_exists( $plugin_dir . "/js/select2/select2_locale_{$js_locale}.js" ) )
+				$select2_locale_src = $this->plugin_url . "js/select2/select2_locale_{$js_locale}.js";
+			else if ( file_exists( $plugin_dir . "/js/select2/select2_locale_{$js_locale_short}.js" ) )
+				$select2_locale_src = $this->plugin_url . "js/select2/select2_locale_{$js_locale_short}.js";
+
+			if ( isset( $select2_locale_src ) )
+				wp_register_script( 'jquery-select2-locale', $select2_locale_src, array( 'jquery-select2' ), '3.5.2', true );
+
+			if ( ! wp_style_is( 'jquery-select2', 'registered' ) )
+				wp_register_style( 'jquery-select2', $this->plugin_url . "css/select2/select2.css", array(), '3.5.2' );
+		}
+
 		$this->add_filters();
 
 		$this->add_actions();
@@ -4245,6 +4270,17 @@ class Multilingual_WP {
 		$url = $url ? $url : $this->plugin_url . "flags/{$size}/earth.png";
 
 		return $url;
+	}
+
+	public function get_flag_icon( $language = '', $size = '' ) {
+		$language = $language && isset( self::$options->languages[ $language ] ) ? $language : $this->current_lang;
+		$size = $size && in_array( intval( $size ), array( 16, 24, 32, 48, 64 ) ) ? $size : self::$options->dfs;		
+		
+		$flag = self::$options->languages[ $language ]['icon'];
+
+		var_dump( self::$options->languages );
+		var_dump( $language );
+		var_dump( $flag );
 	}
 
 	public function fix_redirect( $redirect_url, $requested_url ) {

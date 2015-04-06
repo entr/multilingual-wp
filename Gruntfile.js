@@ -28,10 +28,18 @@ module.exports = function(grunt) {
                 var sub = path.basename( path.dirname(src) );
                 layout = path.join( 'flags', sub );
                 break;
+              case 'css':
+              case 'js':
+                layout = path.join( type, component );
+                break;
+              case 'asset':
+                layout = path.join( 'css', component );
+                break;
               default:
-                layout = type;
+                layout = path.join( 'vendor', component );
             }
-            
+
+            grunt.log.debug( type );
             grunt.log.debug( layout );
             return layout;
           }

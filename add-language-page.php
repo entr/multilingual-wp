@@ -28,7 +28,7 @@ class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 
 	public function enqueue_scripts( $handle ) {
 		if ( 'multilingual-wp_page_add-new-language' == $handle ) {
-			global $wp_version;
+			global $wp_version, $MLWP_FLAGS;
 
 			if ( version_compare( $wp_version, '3.5', '>=' ) ) {
 				if ( ! did_action( 'wp_enqueue_media' ) ) {
@@ -42,6 +42,19 @@ class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 			}
 
 			wp_enqueue_style( 'multilingual-wp-settings-css', $this->plugin_url . 'css/multilingual-wp-settings.css' );
+			wp_enqueue_style( 'flag-icon' );
+
+			/**
+			 * Enqueue Select2
+			 */
+			wp_enqueue_script( 'jquery-select2' );
+			wp_enqueue_script( 'jquery-select2-locale' );
+			wp_enqueue_style( 'jquery-select2' );
+
+			wp_localize_script( 'multilingual-wp-settings-js', '_wpml_flags', $MLWP_FLAGS );
+			wp_localize_script( 'multilingual-wp-settings-js', '_mlwp_flag_input', array(
+					'placeholder' => __( 'Select a flag', 'multilingual-wp' )
+				) );
 		}
 	}
 
@@ -122,7 +135,7 @@ class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 		ob_start();
 
 		apply_filters( 'the_content', __( 'Here you can add a new language.', 'multilingual-wp' ) );
-
+		global $MLWP_FLAGS;
 		echo $this->table( array(
 			array(
 				'title' => __( 'Language Label <span class="required">*</span>', 'multilingual-wp' ),
@@ -170,10 +183,11 @@ class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 			),
 			array(
 				'title' => __( 'Language Flag <span class="required">*</span>', 'multilingual-wp' ),
-				'type' => 'text',
+				'type' => 'select',
 				'name' => "language[icon]",
 				'desc' => __( 'Select the flag that will represent this language. The current flag is <img src="' . $this->plugin_url . 'flags/24/antarctica.png" class="lang_icon" alt="" />', 'multilingual-wp' ),
-				'value' => 'antarctica.png',
+				'value' => '',
+				'choices' => $MLWP_FLAGS,
 				'extra' => array( 'class' => 'regular-text mlwp_flag_input' )
 				// 'render' => array( $this, 'render_lf_dd' )
 			),
@@ -212,34 +226,4 @@ class Multilingual_WP_Add_Language_Page extends scb_MLWP_AdminPage {
 			</div>';
 	}
 
-	public function page_footer() {
-		global $MULTILINGUAL_WP_FLAGS, $wp_version;
-		$i = 2; ?>
-		<div id="mlwp_flag_select" class="metabox-holder">
-			<div class="postbox">
-				<div class="inside">
-					<div class="col col3">
-						<?php if ( version_compare( $wp_version, '3.5', '>=' ) ) : ?>
-							<a class="button-primary add_media" href="#"><?php _e( 'Custom Flag', 'multilingual-wp' ); ?></a>
-						<?php else : ?>
-							<a class="button-primary thickbox" href="<?php echo admin_url( 'media-upload.php?post_id=0&amp;mlwp_media=1&amp;TB_iframe=1&amp;width=640&amp;height=198' ) ?>"><?php _e( 'Custom Flag', 'multilingual-wp' ); ?></a>
-						<?php endif; ?>
-					</div>
-					<?php foreach ( $MULTILINGUAL_WP_FLAGS as $val => $label ) :
-						$src = str_replace( ' ', '%20', $val ); ?>
-						<div class="col col3">
-							<label><input type="radio" class="lang_radio" value="<?php echo $val; ?>" name="multilingual-wp-flag" /> <img src="<?php echo "{$this->plugin_url}flags/24/{$src}"; ?>" alt="<?php echo esc_attr( $label ); ?>" /> <?php echo ucwords( $label ); ?></label>
-						</div>
-						<?php if ( $i % 3 == 0 ) : ?>
-							<div class="cl">&nbsp;</div>
-						<?php endif;
-						$i ++; ?>
-					<?php endforeach; ?>
-					<div class="cl">&nbsp;</div>
-				</div>
-			</div>
-		</div>
-<?php
-		parent::page_footer();
-	}
 }
